@@ -21,3 +21,25 @@
 1. 安装依赖：
    ```bash
    npm install
+   
+2.配置环境变量：在根目录创建 .env 文件，填入：
+env
+PORT=3000
+MONGO_URI=mongodb://127.0.0.1:27017/survey_system
+JWT_SECRET=your_secret_key
+
+3.启动服务：
+bash
+npm run dev
+
+## 项目结构
+models/：数据模型（User, Survey, Response, Question, QuestionVersion）
+controllers/：控制器（用户、问卷、答卷、题库、统计）
+services/：核心业务逻辑（跳转计算、校验、聚合）
+middlewares/：认证中间件
+docs/：项目文档（报告、测试用例、AI 日志）
+
+## 文档导航
+第一阶段与第二阶段项目报告
+测试用例文档
+AI 使用日志
