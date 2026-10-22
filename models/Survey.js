@@ -213,10 +213,20 @@ const surveySchema = new Schema(
     },
 
     // 问卷题目
-    questions: {
-      type: [questionSchema],
-      default: [],
+    // 👇 第一阶段的老字段，为了兼容旧数据，重命名但不删除
+    legacy_questions: { 
+      type: [questionSchema], 
+      default: [] 
     },
+
+      // 👇 第二阶段新增：通过引用（ID + 版本号）来绑定题库里的题目
+  question_refs: [
+    {
+      question_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
+      version: { type: Number, required: true }, // 记录使用的是哪个版本
+      _id: false // 禁用自动生成的子文档 ID
+    }
+  ],
   },
   {
     timestamps: {
@@ -228,7 +238,7 @@ const surveySchema = new Schema(
 
 // 6. 保存前校验问卷内部结构
 surveySchema.pre('validate', function () {
-  const questions = this.questions || [];
+    const questions = this.legacy_questions || []; 
   const questionIds = new Set();
 
   // 检查题目 ID 是否重复，以及各题型配置

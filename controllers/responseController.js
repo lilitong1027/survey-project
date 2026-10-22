@@ -2,6 +2,8 @@
 const mongoose = require('mongoose');
 const Survey = require('../models/Survey');
 const Response = require('../models/Response');
+const QuestionVersion = require('../models/QuestionVersion');
+const Question = require('../models/Question');
 
 const { validateAnswer } = require('../services/validationService');
 const { calculateJumpPath } = require('../services/jumpService');
@@ -40,6 +42,36 @@ if (!share_id) { // ✅ 直接用 share_id 判断是否为空
       });
     }
 
+        // 👇 核心：在这里插入数据还原逻辑 👇
+    // ========================================================
+    if (survey.question_refs && survey.question_refs.length > 0) {
+      // 新问卷逻辑：去版本表里还原快照
+      const finalQuestions = [];
+      for (const ref of survey.question_refs) {
+        const qVersion = await QuestionVersion.findOne({
+          question_id: ref.question_id,
+          version: ref.version
+        });
+        
+        if (qVersion) {
+          finalQuestions.push({
+            question_id: qVersion.question_id.toString(),
+            title: qVersion.title,
+            type: qVersion.type,
+            options: qVersion.options,
+            required: qVersion.required,
+            validation: qVersion.validation,
+            jump_rules: qVersion.jump_rules
+          });
+        }
+      }
+      // 偷梁换柱：把查出来的最新题目塞给 questions 字段
+      survey.questions = finalQuestions;
+    } else {
+      // 旧问卷逻辑：如果没引用，直接把第一阶段的旧数据塞过去
+      survey.questions = survey.legacy_questions || [];
+    }
+    
     if (
       survey.deadline &&
       new Date(survey.deadline).getTime() <= Date.now()

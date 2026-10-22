@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth'); 
 const surveyRoutes = require('./routes/surveys');
 const responseRoutes = require('./routes/responses');
+const questionRoutes = require('./routes/questions'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); 
 app.use('/api/surveys', surveyRoutes);
 app.use('/api/surveys', responseRoutes);
+app.use('/api/questions', questionRoutes);
 
 
 // 测试路由
